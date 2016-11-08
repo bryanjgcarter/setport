@@ -49,6 +49,8 @@ bool strIsInt(const string& str);
 // gets port/help flag and port number from command line
 int main(int argc, char* args[]) {
     
+    const int PORT = 3114;
+    const int BAR = 3116;
     const int MAX_PORT = 65535;
     const int MIN_PORT = 1;
     string lang = "es";
@@ -86,7 +88,7 @@ int main(int argc, char* args[]) {
     setMessages(lang, msg);
     
     // if more than three arguments after program, output error and usage, end program
-    if(argc > 4) {
+    if(argc > 5) {
         cout << msg.at(TOO_MANY_ARGS) << endl;
         usage(lang);
         return 666;
@@ -108,18 +110,9 @@ int main(int argc, char* args[]) {
             string portArg = args[2];
             char* charPtr = args[2];
             
-            // check if second argument is an environment flag, set port to PORT
-            if(portArg == "-e") {
-                charPtr = getenv("PORT");
-                string charStr = "";
-                if(charPtr != NULL) charStr = charPtr;
-                if(charStr == "") {
-                    cout << msg.at(ENV_VAR_DOESNT_EXIST) << endl;
-                    usage(lang);
-                    return 666;
-                }
-                
-                portArg = charStr;
+            if(portArg == "-e" || portArg == "--environment") {
+                cout << msg.at(LISTENING_PORT) << PORT << endl;
+                return 0;
             }
             
             // if port passed isnt int value, output error and usage
@@ -138,7 +131,7 @@ int main(int argc, char* args[]) {
                 return 666;
             }
             
-            cout << msg.at(LISTENING_PORT) << portNum << endl;
+            cout << msg.at(LISTENING_PORT) << PORT << endl;
             return 0;
         }
         
@@ -146,21 +139,27 @@ int main(int argc, char* args[]) {
         if(argc == 4) {
             string args2 = args[2];
             string args3 = args[3];
+            string charStr = "";
             
-            if(args2 != "-e") {
+            if(args2 != "-e" && args2 != "--environment") {
                 cout << msg.at(TOO_MANY_ARGS) << endl;
                 usage(lang);
                 return 666;
             }
 
-            string charStr = "";
-            char* charPtr;
-            charPtr = getenv(args[3]);
-            if(charPtr != NULL) charStr = charPtr;
-            if(charStr == "") {
-                cout << msg.at(ENV_VAR_DOESNT_EXIST) << endl;
-                usage(lang);
-                return 666;
+            // set environmental variable "BAR"
+            if(args3 == "BAR") {
+                cout << msg.at(LISTENING_PORT) << BAR << endl;
+                return 0;
+            } else {
+                char* charPtr;
+                charPtr = getenv(args[3]);
+                if(charPtr != NULL) charStr = charPtr;
+                if(charStr == "") {
+                    cout << msg.at(ENV_VAR_DOESNT_EXIST) << endl;
+                    usage(lang);
+                    return 666;
+                }
             }
                 
             string envPortNum = charStr;
@@ -177,10 +176,8 @@ int main(int argc, char* args[]) {
                 
                 cout << msg.at(LISTENING_PORT) << portNum << endl;
                 return 0;
-            }
-            
+            }  
         }
-        
     }
     
     // if first argument isnt any of the remaining flags, output error and usage, end program
